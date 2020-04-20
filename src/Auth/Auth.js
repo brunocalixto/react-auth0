@@ -16,14 +16,14 @@ export default class Auth {
     this.auth0.authorize();
   };
 
-  handleAuthentication = (history) => {
+  handleAuthentication = () => {
     this.auth0.parseHash((err, authResult) => {
       if (authResult && authResult.accessToken && authResult.idToken) {
         this.setSession(authResult);
         this.history.push("/");
       } else if (err) {
         this.history.push("/");
-        alert(`Error: ${err.error}. Check the console for further details`);
+        alert(`Error: ${err.error}. Check the console for further details.`);
         console.log(err);
       }
     });
@@ -35,8 +35,14 @@ export default class Auth {
     const expiresAt = JSON.stringify(
       authResult.expiresIn * 1000 + new Date().getTime()
     );
-    localStorage.setItem("access_token", authResult.acessToken);
+
+    localStorage.setItem("access_token", authResult.accessToken);
     localStorage.setItem("id_token", authResult.idToken);
-    localStorage.setItem("expires_at", authResult.expiresAt);
+    localStorage.setItem("expires_at", expiresAt);
   };
+
+  isAuthenticated() {
+    const expiresAt = JSON.parse(localStorage.getItem("expires_at"));
+    return new Date().getTime() < expiresAt;
+  }
 }
